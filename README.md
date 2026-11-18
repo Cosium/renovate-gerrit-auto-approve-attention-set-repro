@@ -35,8 +35,9 @@ fresh Gerrit 3.15.0 (development auth, default `admin`/`secret`) and then:
 3. reads the change's reviewers and attention set.
 
 Renovate logs (debug) go to `logs/`. The script ends with `Reproduced` (exit
-code 1) or `Not reproduced` (exit code 0), and fails if `alice` is not a
-reviewer, which means Renovate stopped early.
+code 1) or `Not reproduced` (exit code 0). It fails if the change lacks
+Renovate's `Code-Review +2` or `alice` as a reviewer, which means Renovate
+stopped early.
 
 ## Current behavior
 
@@ -69,6 +70,9 @@ the proposed fix (`d7c62c337f`, run from source):
 
 ==> Not reproduced: alice reviews the auto-approved change without being in its attention set
 ```
+
+Changes that are not approved, or approved by someone else, keep Gerrit's
+behaviour with the fix; the unit tests of the pull request cover those cases.
 
 ## Files
 

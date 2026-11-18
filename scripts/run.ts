@@ -263,8 +263,8 @@ const createProject = async (
 
 const mode = parseMode(process.argv.slice(2));
 const logName = computeLogName(mode);
-const workDirectory = mkdtempSync(join(tmpdir(), 'auto-approve-'));
 const gerritUrl = startCleanGerrit();
+const workDirectory = mkdtempSync(join(tmpdir(), 'auto-approve-'));
 try {
   prepareLogDirectory();
   log('Creating users renovate and alice (reviewer)');
@@ -280,14 +280,18 @@ try {
     (reviewer) => reviewer.username,
   );
   const attentionSet = Object.values(change.attention_set ?? {});
+  const approver = change.labels?.['Code-Review']?.approved?.username;
   console.log(`  change ${change._number}: ${change.subject}`);
-  console.log(
-    `  Code-Review approved by: ${change.labels?.['Code-Review']?.approved?.username ?? 'nobody'}`,
-  );
+  console.log(`  Code-Review approved by: ${approver ?? 'nobody'}`);
   console.log(`  reviewers: ${JSON.stringify(reviewers)}`);
   console.log(`  attention set:${attentionSet.length === 0 ? ' (empty)' : ''}`);
   for (const entry of attentionSet) {
     console.log(`    ${entry.account.username}: ${entry.reason}`);
+  }
+  if (approver !== 'renovate') {
+    throw new Error(
+      `The change is not approved by renovate, see logs/${logName}.log`,
+    );
   }
   if (!reviewers.includes('alice')) {
     throw new Error(
